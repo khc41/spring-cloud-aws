@@ -41,12 +41,22 @@ public class SqsProperties extends AwsClientProperties {
 
 	private Listener listener = new Listener();
 
+	private Batch batch = new Batch();
+
 	public Listener getListener() {
 		return this.listener;
 	}
 
 	public void setListener(Listener listener) {
 		this.listener = listener;
+	}
+
+	public Batch getBatch() {
+		return batch;
+	}
+
+	public void setBatch(Batch batch) {
+		this.batch = batch;
 	}
 
 	@Nullable
@@ -148,39 +158,60 @@ public class SqsProperties extends AwsClientProperties {
 	public static class Batch {
 
 		/**
+		 * Enables SQS automatic batching using AWS SDK's SqsAsyncBatchManager.
+		 */
+		private boolean enabled = false;
+
+		/**
 		 * The maximum number of messages that can be processed in a single batch. The
 		 * maximum is 10.
 		 */
+		@Nullable
 		private Integer maxNumberOfMessages;
 
 		/**
 		 * The frequency at which requests are sent to SQS when processing messages in a
 		 * batch.
 		 */
+		@Nullable
 		private Duration sendBatchFrequency;
 
 		/**
 		 * The visibility timeout to set for messages received in a batch. If unset, the
 		 * queue default is used.
 		 */
+		@Nullable
 		private Duration visibilityTimeout;
 
 		/**
 		 * The minimum wait duration for a receiveMessage request in a batch. To avoid
 		 * unnecessary CPU usage, do not set this value to 0.
 		 */
+		@Nullable
 		private Duration waitTimeSeconds;
 
 		/**
 		 * The list of system attribute names to request for receiveMessage calls.
 		 */
+		@Nullable
 		private List<MessageSystemAttributeName> systemAttributeNames;
 
 		/**
 		 * The list of attribute names to request for receiveMessage calls.
 		 */
+		@Nullable
 		private List<String> attributeNames;
 
+		@Nullable
+		public Boolean getEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(Boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		@Nullable
 		public Integer getMaxNumberOfMessages() {
 			return maxNumberOfMessages;
 		}
@@ -189,6 +220,7 @@ public class SqsProperties extends AwsClientProperties {
 			this.maxNumberOfMessages = maxNumberOfMessages;
 		}
 
+		@Nullable
 		public Duration getSendBatchFrequency() {
 			return sendBatchFrequency;
 		}
@@ -197,6 +229,7 @@ public class SqsProperties extends AwsClientProperties {
 			this.sendBatchFrequency = sendBatchFrequency;
 		}
 
+		@Nullable
 		public Duration getVisibilityTimeout() {
 			return visibilityTimeout;
 		}
@@ -205,6 +238,7 @@ public class SqsProperties extends AwsClientProperties {
 			this.visibilityTimeout = visibilityTimeout;
 		}
 
+		@Nullable
 		public Duration getWaitTimeSeconds() {
 			return waitTimeSeconds;
 		}
@@ -213,6 +247,7 @@ public class SqsProperties extends AwsClientProperties {
 			this.waitTimeSeconds = waitTimeSeconds;
 		}
 
+		@Nullable
 		public List<MessageSystemAttributeName> getSystemAttributeNames() {
 			return systemAttributeNames;
 		}
@@ -221,6 +256,7 @@ public class SqsProperties extends AwsClientProperties {
 			this.systemAttributeNames = systemAttributeNames;
 		}
 
+		@Nullable
 		public List<String> getAttributeNames() {
 			return attributeNames;
 		}

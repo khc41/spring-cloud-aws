@@ -52,6 +52,8 @@ import software.amazon.awssdk.services.sqs.batchmanager.BatchOverrideConfigurati
 import software.amazon.awssdk.services.sqs.batchmanager.SqsAsyncBatchManager;
 import software.amazon.awssdk.services.sqs.model.Message;
 
+import java.util.concurrent.Executors;
+
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for SQS integration.
  *
@@ -98,6 +100,7 @@ public class SqsAutoConfiguration {
 	private SqsAsyncBatchManager createBatchManager(SqsAsyncClient sqsAsyncClient) {
 		return SqsAsyncBatchManager.builder()
 			.client(sqsAsyncClient)
+            .scheduledExecutor(Executors.newScheduledThreadPool(5))
 			.overrideConfiguration(this::configurationProperties)
 			.build();
 	}

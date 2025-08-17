@@ -206,9 +206,9 @@ public class SqsProperties extends AwsClientProperties {
 			return enabled;
 		}
 
-		public void setEnabled(Boolean enabled) {
-			this.enabled = enabled;
-		}
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
 		@Nullable
 		public Integer getMaxNumberOfMessages() {

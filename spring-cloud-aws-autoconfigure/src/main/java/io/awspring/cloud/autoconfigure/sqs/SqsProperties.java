@@ -17,9 +17,12 @@ package io.awspring.cloud.autoconfigure.sqs;
 
 import io.awspring.cloud.autoconfigure.AwsClientProperties;
 import io.awspring.cloud.sqs.listener.QueueNotFoundStrategy;
-import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.Nullable;
+import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName;
+
+import java.time.Duration;
+import java.util.List;
 
 /**
  * Properties related to AWS SQS.
@@ -79,8 +82,9 @@ public class SqsProperties extends AwsClientProperties {
 	public static class Listener {
 
 		/**
-		 * The maximum concurrent messages that can be processed simultaneously for each queue. Note that if
-		 * acknowledgement batching is being used, the actual maximum number of messages inflight might be higher.
+		 * The maximum concurrent messages that can be processed simultaneously for each
+		 * queue. Note that if acknowledgement batching is being used, the actual maximum
+		 * number of messages inflight might be higher.
 		 */
 		@Nullable
 		private Integer maxConcurrentMessages;
@@ -138,6 +142,93 @@ public class SqsProperties extends AwsClientProperties {
 		public void setMaxDelayBetweenPolls(Duration maxDelayBetweenPolls) {
 			this.maxDelayBetweenPolls = maxDelayBetweenPolls;
 		}
+
+	}
+
+	public static class Batch {
+
+		/**
+		 * The maximum number of messages that can be processed in a single batch. The
+		 * maximum is 10.
+		 */
+		private Integer maxNumberOfMessages;
+
+		/**
+		 * The frequency at which requests are sent to SQS when processing messages in a
+		 * batch.
+		 */
+		private Duration sendBatchFrequency;
+
+		/**
+		 * The visibility timeout to set for messages received in a batch. If unset, the
+		 * queue default is used.
+		 */
+		private Duration visibilityTimeout;
+
+		/**
+		 * The minimum wait duration for a receiveMessage request in a batch. To avoid
+		 * unnecessary CPU usage, do not set this value to 0.
+		 */
+		private Duration waitTimeSeconds;
+
+		/**
+		 * The list of system attribute names to request for receiveMessage calls.
+		 */
+		private List<MessageSystemAttributeName> systemAttributeNames;
+
+		/**
+		 * The list of attribute names to request for receiveMessage calls.
+		 */
+		private List<String> attributeNames;
+
+		public Integer getMaxNumberOfMessages() {
+			return maxNumberOfMessages;
+		}
+
+		public void setMaxNumberOfMessages(Integer maxNumberOfMessages) {
+			this.maxNumberOfMessages = maxNumberOfMessages;
+		}
+
+		public Duration getSendBatchFrequency() {
+			return sendBatchFrequency;
+		}
+
+		public void setSendBatchFrequency(Duration sendBatchFrequency) {
+			this.sendBatchFrequency = sendBatchFrequency;
+		}
+
+		public Duration getVisibilityTimeout() {
+			return visibilityTimeout;
+		}
+
+		public void setVisibilityTimeout(Duration visibilityTimeout) {
+			this.visibilityTimeout = visibilityTimeout;
+		}
+
+		public Duration getWaitTimeSeconds() {
+			return waitTimeSeconds;
+		}
+
+		public void setWaitTimeSeconds(Duration waitTimeSeconds) {
+			this.waitTimeSeconds = waitTimeSeconds;
+		}
+
+		public List<MessageSystemAttributeName> getSystemAttributeNames() {
+			return systemAttributeNames;
+		}
+
+		public void setSystemAttributeNames(List<MessageSystemAttributeName> systemAttributeNames) {
+			this.systemAttributeNames = systemAttributeNames;
+		}
+
+		public List<String> getAttributeNames() {
+			return attributeNames;
+		}
+
+		public void setAttributeNames(List<String> attributeNames) {
+			this.attributeNames = attributeNames;
+		}
+
 	}
 
 }

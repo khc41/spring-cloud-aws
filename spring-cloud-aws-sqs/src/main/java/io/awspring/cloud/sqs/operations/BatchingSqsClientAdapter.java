@@ -11,6 +11,7 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	private final SqsAsyncBatchManager batchManager;
 
 	public BatchingSqsClientAdapter(SqsAsyncBatchManager batchManager) {
+		Assert.notNull(batchManager, "batchManager cannot be null");
 		this.batchManager = batchManager;
 	}
 

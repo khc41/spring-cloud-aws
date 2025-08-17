@@ -202,8 +202,7 @@ public class SqsProperties extends AwsClientProperties {
 		@Nullable
 		private List<String> attributeNames;
 
-		@Nullable
-		public Boolean getEnabled() {
+		public boolean isEnabled() {
 			return enabled;
 		}
 

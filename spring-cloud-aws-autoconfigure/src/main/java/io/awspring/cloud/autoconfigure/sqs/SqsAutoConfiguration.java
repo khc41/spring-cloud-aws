@@ -34,6 +34,7 @@ import io.awspring.cloud.sqs.support.converter.SqsMessagingMessageConverter;
 import io.awspring.cloud.sqs.support.observation.SqsListenerObservation;
 import io.awspring.cloud.sqs.support.observation.SqsTemplateObservation;
 import io.micrometer.observation.ObservationRegistry;
+import java.util.concurrent.Executors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -51,8 +52,6 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClientBuilder;
 import software.amazon.awssdk.services.sqs.batchmanager.BatchOverrideConfiguration;
 import software.amazon.awssdk.services.sqs.batchmanager.SqsAsyncBatchManager;
 import software.amazon.awssdk.services.sqs.model.Message;
-
-import java.util.concurrent.Executors;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for SQS integration.
@@ -84,10 +83,10 @@ public class SqsAutoConfiguration {
 			ObjectProvider<AwsConnectionDetails> connectionDetails,
 			ObjectProvider<SqsAsyncClientCustomizer> sqsAsyncClientCustomizers,
 			ObjectProvider<AwsAsyncClientCustomizer> awsAsyncClientCustomizers) {
-        return awsClientBuilderConfigurer.configureAsyncClient(SqsAsyncClient.builder(), this.sqsProperties,
-                connectionDetails.getIfAvailable(), configurer.getIfAvailable(),
-                sqsAsyncClientCustomizers.orderedStream(), awsAsyncClientCustomizers.orderedStream()).build();
-    }
+		return awsClientBuilderConfigurer.configureAsyncClient(SqsAsyncClient.builder(), this.sqsProperties,
+				connectionDetails.getIfAvailable(), configurer.getIfAvailable(),
+				sqsAsyncClientCustomizers.orderedStream(), awsAsyncClientCustomizers.orderedStream()).build();
+	}
 
 	@ConditionalOnProperty(name = "spring.cloud.aws.sqs.batch.enabled", havingValue = "true")
 	@Bean
@@ -98,11 +97,9 @@ public class SqsAutoConfiguration {
 	}
 
 	private SqsAsyncBatchManager createBatchManager(SqsAsyncClient sqsAsyncClient) {
-		return SqsAsyncBatchManager.builder()
-			.client(sqsAsyncClient)
-            .scheduledExecutor(Executors.newScheduledThreadPool(5))
-			.overrideConfiguration(this::configurationProperties)
-			.build();
+		return SqsAsyncBatchManager.builder().client(sqsAsyncClient)
+				.scheduledExecutor(Executors.newScheduledThreadPool(5))
+				.overrideConfiguration(this::configurationProperties).build();
 	}
 
 	private void configurationProperties(BatchOverrideConfiguration.Builder options) {
@@ -112,7 +109,7 @@ public class SqsAutoConfiguration {
 		mapper.from(this.sqsProperties.getBatch().getWaitTimeSeconds()).to(options::receiveMessageMinWaitDuration);
 		mapper.from(this.sqsProperties.getBatch().getVisibilityTimeout()).to(options::receiveMessageVisibilityTimeout);
 		mapper.from(this.sqsProperties.getBatch().getSystemAttributeNames())
-			.to(options::receiveMessageSystemAttributeNames);
+				.to(options::receiveMessageSystemAttributeNames);
 		mapper.from(this.sqsProperties.getBatch().getAttributeNames()).to(options::receiveMessageAttributeNames);
 	}
 
@@ -122,15 +119,15 @@ public class SqsAutoConfiguration {
 			ObjectProvider<ObservationRegistry> observationRegistryProvider,
 			ObjectProvider<SqsTemplateObservation.Convention> observationConventionProvider,
 			MessagingMessageConverter<Message> messageConverter) {
-        SqsTemplateBuilder builder = SqsTemplate.builder().sqsAsyncClient(sqsAsyncClient)
-                .messageConverter(messageConverter);
+		SqsTemplateBuilder builder = SqsTemplate.builder().sqsAsyncClient(sqsAsyncClient)
+				.messageConverter(messageConverter);
 		objectMapperProvider.ifAvailable(om -> setMapperToConverter(messageConverter, om));
-        if (this.sqsProperties.isObservationEnabled()) {
-            observationRegistryProvider
-                    .ifAvailable(registry -> builder.configure(options -> options.observationRegistry(registry)));
-            observationConventionProvider
-                    .ifAvailable(convention -> builder.configure(options -> options.observationConvention(convention)));
-        }
+		if (this.sqsProperties.isObservationEnabled()) {
+			observationRegistryProvider
+					.ifAvailable(registry -> builder.configure(options -> options.observationRegistry(registry)));
+			observationConventionProvider
+					.ifAvailable(convention -> builder.configure(options -> options.observationConvention(convention)));
+		}
 		if (sqsProperties.getQueueNotFoundStrategy() != null) {
 			builder.configure((options) -> options.queueNotFoundStrategy(sqsProperties.getQueueNotFoundStrategy()));
 		}
@@ -156,12 +153,12 @@ public class SqsAutoConfiguration {
 		interceptors.forEach(factory::addMessageInterceptor);
 		asyncInterceptors.forEach(factory::addMessageInterceptor);
 		objectMapperProvider.ifAvailable(om -> setMapperToConverter(messagingMessageConverter, om));
-        if (this.sqsProperties.isObservationEnabled()) {
-            observationRegistry
-                    .ifAvailable(registry -> factory.configure(options -> options.observationRegistry(registry)));
-            observationConventionProvider
-                    .ifAvailable(convention -> factory.configure(options -> options.observationConvention(convention)));
-        }
+		if (this.sqsProperties.isObservationEnabled()) {
+			observationRegistry
+					.ifAvailable(registry -> factory.configure(options -> options.observationRegistry(registry)));
+			observationConventionProvider
+					.ifAvailable(convention -> factory.configure(options -> options.observationConvention(convention)));
+		}
 		factory.configure(options -> options.messageConverter(messagingMessageConverter));
 		return factory;
 	}

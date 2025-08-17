@@ -334,136 +334,128 @@ class SqsAutoConfigurationTest {
 				});
 	}
 
-    @Test
-    void sqsBatchAutoConfigurationIsDisabledByDefault() {
-        this.contextRunner.run(context -> {
-            assertThat(context).hasSingleBean(SqsAsyncClient.class);
-            SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
-            assertThat(client).isNotInstanceOf(BatchingSqsClientAdapter.class);
-        });
-    }
+	@Test
+	void sqsBatchAutoConfigurationIsDisabledByDefault() {
+		this.contextRunner.run(context -> {
+			assertThat(context).hasSingleBean(SqsAsyncClient.class);
+			SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
+			assertThat(client).isNotInstanceOf(BatchingSqsClientAdapter.class);
+		});
+	}
 
-    @Test
-    void sqsBatchAutoConfigurationIsEnabled() {
-        this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true").run(context -> {
-            assertThat(context.getBeansOfType(SqsAsyncClient.class)).hasSize(2);
+	@Test
+	void sqsBatchAutoConfigurationIsEnabled() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true").run(context -> {
+			assertThat(context.getBeansOfType(SqsAsyncClient.class)).hasSize(2);
 
-            SqsAsyncClient primary = context.getBean(SqsAsyncClient.class);
-            assertThat(primary).isInstanceOf(BatchingSqsClientAdapter.class);
+			SqsAsyncClient primary = context.getBean(SqsAsyncClient.class);
+			assertThat(primary).isInstanceOf(BatchingSqsClientAdapter.class);
 
-            assertThat(context).hasBean("sqsAsyncClient");
-            assertThat(context).hasBean("batchSqsAsyncClient");
-        });
-    }
+			assertThat(context).hasBean("sqsAsyncClient");
+			assertThat(context).hasBean("batchSqsAsyncClient");
+		});
+	}
 
-    @Test
-    void sqsBatchConfigurationProperties() {
-        this.contextRunner.withPropertyValues(
-                        "spring.cloud.aws.sqs.batch.enabled:true",
-                        "spring.cloud.aws.sqs.batch.max-number-of-messages:5",
-                        "spring.cloud.aws.sqs.batch.send-batch-frequency:PT0.5S")
-                .run(context -> {
-                    SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
-                    assertThat(client).isInstanceOf(BatchingSqsClientAdapter.class);
-                });
-    }
+	@Test
+	void sqsBatchConfigurationProperties() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true",
+				"spring.cloud.aws.sqs.batch.max-number-of-messages:5",
+				"spring.cloud.aws.sqs.batch.send-batch-frequency:PT0.5S").run(context -> {
+					SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
+					assertThat(client).isInstanceOf(BatchingSqsClientAdapter.class);
+				});
+	}
 
-    @Test
-    void sqsBatchConfigurationPropertiesWithAllSettings() {
-        this.contextRunner.withPropertyValues(
-                        "spring.cloud.aws.sqs.batch.enabled:true",
-                        "spring.cloud.aws.sqs.batch.max-number-of-messages:8",
-                        "spring.cloud.aws.sqs.batch.send-batch-frequency:PT1S",
-                        "spring.cloud.aws.sqs.batch.visibility-timeout:PT30S",
-                        "spring.cloud.aws.sqs.batch.wait-time-seconds:PT5S",
-                        "spring.cloud.aws.sqs.batch.system-attribute-names:SentTimestamp,ApproximateReceiveCount",
-                        "spring.cloud.aws.sqs.batch.attribute-names:attr1,attr2")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(SqsProperties.class);
-                    SqsProperties sqsProperties = context.getBean(SqsProperties.class);
-                    SqsProperties.Batch batchConfig = sqsProperties.getBatch();
-                    
-                    assertThat(batchConfig.isEnabled()).isTrue();
-                    assertThat(batchConfig.getMaxNumberOfMessages()).isEqualTo(8);
-                    assertThat(batchConfig.getSendBatchFrequency()).isEqualTo(Duration.ofSeconds(1));
-                    assertThat(batchConfig.getVisibilityTimeout()).isEqualTo(Duration.ofSeconds(30));
-                    assertThat(batchConfig.getWaitTimeSeconds()).isEqualTo(Duration.ofSeconds(5));
-                    assertThat(batchConfig.getSystemAttributeNames()).containsExactly(
-                            software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName.SENT_TIMESTAMP,
-                            software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT);
-                    assertThat(batchConfig.getAttributeNames()).containsExactly("attr1", "attr2");
+	@Test
+	void sqsBatchConfigurationPropertiesWithAllSettings() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true",
+				"spring.cloud.aws.sqs.batch.max-number-of-messages:8",
+				"spring.cloud.aws.sqs.batch.send-batch-frequency:PT1S",
+				"spring.cloud.aws.sqs.batch.visibility-timeout:PT30S",
+				"spring.cloud.aws.sqs.batch.wait-time-seconds:PT5S",
+				"spring.cloud.aws.sqs.batch.system-attribute-names:SentTimestamp,ApproximateReceiveCount",
+				"spring.cloud.aws.sqs.batch.attribute-names:attr1,attr2").run(context -> {
+					assertThat(context).hasSingleBean(SqsProperties.class);
+					SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+					SqsProperties.Batch batchConfig = sqsProperties.getBatch();
 
-                    SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
-                    assertThat(client).isInstanceOf(BatchingSqsClientAdapter.class);
-                });
-    }
+					assertThat(batchConfig.isEnabled()).isTrue();
+					assertThat(batchConfig.getMaxNumberOfMessages()).isEqualTo(8);
+					assertThat(batchConfig.getSendBatchFrequency()).isEqualTo(Duration.ofSeconds(1));
+					assertThat(batchConfig.getVisibilityTimeout()).isEqualTo(Duration.ofSeconds(30));
+					assertThat(batchConfig.getWaitTimeSeconds()).isEqualTo(Duration.ofSeconds(5));
+					assertThat(batchConfig.getSystemAttributeNames()).containsExactly(
+							software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName.SENT_TIMESTAMP,
+							software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT);
+					assertThat(batchConfig.getAttributeNames()).containsExactly("attr1", "attr2");
 
-    @Test
-    void sqsBatchConfigurationPropertiesWithDefaults() {
-        this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:false")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(SqsProperties.class);
-                    SqsProperties sqsProperties = context.getBean(SqsProperties.class);
-                    SqsProperties.Batch batchConfig = sqsProperties.getBatch();
-                    
-                    assertThat(batchConfig.isEnabled()).isFalse();
-                    assertThat(batchConfig.getMaxNumberOfMessages()).isNull();
-                    assertThat(batchConfig.getSendBatchFrequency()).isNull();
-                    assertThat(batchConfig.getVisibilityTimeout()).isNull();
-                    assertThat(batchConfig.getWaitTimeSeconds()).isNull();
-                    assertThat(batchConfig.getSystemAttributeNames()).isNull();
-                    assertThat(batchConfig.getAttributeNames()).isNull();
-                    
-                    assertThat(context).hasSingleBean(SqsAsyncClient.class);
-                    SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
-                    assertThat(client).isNotInstanceOf(BatchingSqsClientAdapter.class);
-                });
-    }
+					SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
+					assertThat(client).isInstanceOf(BatchingSqsClientAdapter.class);
+				});
+	}
 
-    @Test
-    void sqsBatchConfigurationWithVisibilityTimeout() {
-        this.contextRunner.withPropertyValues(
-                        "spring.cloud.aws.sqs.batch.enabled:true",
-                        "spring.cloud.aws.sqs.batch.visibility-timeout:PT60S")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(SqsProperties.class);
-                    SqsProperties sqsProperties = context.getBean(SqsProperties.class);
-                    SqsProperties.Batch batchConfig = sqsProperties.getBatch();
-                    
-                    assertThat(batchConfig.isEnabled()).isTrue();
-                    assertThat(batchConfig.getVisibilityTimeout()).isEqualTo(Duration.ofSeconds(60));
-                });
-    }
+	@Test
+	void sqsBatchConfigurationPropertiesWithDefaults() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:false").run(context -> {
+			assertThat(context).hasSingleBean(SqsProperties.class);
+			SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+			SqsProperties.Batch batchConfig = sqsProperties.getBatch();
 
-    @Test
-    void sqsBatchConfigurationWithWaitTimeSeconds() {
-        this.contextRunner.withPropertyValues(
-                        "spring.cloud.aws.sqs.batch.enabled:true",
-                        "spring.cloud.aws.sqs.batch.wait-time-seconds:PT20S")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(SqsProperties.class);
-                    SqsProperties sqsProperties = context.getBean(SqsProperties.class);
-                    SqsProperties.Batch batchConfig = sqsProperties.getBatch();
-                    
-                    assertThat(batchConfig.isEnabled()).isTrue();
-                    assertThat(batchConfig.getWaitTimeSeconds()).isEqualTo(Duration.ofSeconds(20));
-                });
-    }
+			assertThat(batchConfig.isEnabled()).isFalse();
+			assertThat(batchConfig.getMaxNumberOfMessages()).isNull();
+			assertThat(batchConfig.getSendBatchFrequency()).isNull();
+			assertThat(batchConfig.getVisibilityTimeout()).isNull();
+			assertThat(batchConfig.getWaitTimeSeconds()).isNull();
+			assertThat(batchConfig.getSystemAttributeNames()).isNull();
+			assertThat(batchConfig.getAttributeNames()).isNull();
 
-    @Test
-    void sqsBatchConfigurationWithAttributeNames() {
-        this.contextRunner.withPropertyValues(
-                        "spring.cloud.aws.sqs.batch.enabled:true",
-                        "spring.cloud.aws.sqs.batch.attribute-names:MessageGroupId,MessageDeduplicationId")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(SqsProperties.class);
-                    SqsProperties sqsProperties = context.getBean(SqsProperties.class);
-                    SqsProperties.Batch batchConfig = sqsProperties.getBatch();
-                    
-                    assertThat(batchConfig.isEnabled()).isTrue();
-                    assertThat(batchConfig.getAttributeNames()).containsExactly("MessageGroupId", "MessageDeduplicationId");
-                });
-    }
+			assertThat(context).hasSingleBean(SqsAsyncClient.class);
+			SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
+			assertThat(client).isNotInstanceOf(BatchingSqsClientAdapter.class);
+		});
+	}
+
+	@Test
+	void sqsBatchConfigurationWithVisibilityTimeout() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true",
+				"spring.cloud.aws.sqs.batch.visibility-timeout:PT60S").run(context -> {
+					assertThat(context).hasSingleBean(SqsProperties.class);
+					SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+					SqsProperties.Batch batchConfig = sqsProperties.getBatch();
+
+					assertThat(batchConfig.isEnabled()).isTrue();
+					assertThat(batchConfig.getVisibilityTimeout()).isEqualTo(Duration.ofSeconds(60));
+				});
+	}
+
+	@Test
+	void sqsBatchConfigurationWithWaitTimeSeconds() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true",
+				"spring.cloud.aws.sqs.batch.wait-time-seconds:PT20S").run(context -> {
+					assertThat(context).hasSingleBean(SqsProperties.class);
+					SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+					SqsProperties.Batch batchConfig = sqsProperties.getBatch();
+
+					assertThat(batchConfig.isEnabled()).isTrue();
+					assertThat(batchConfig.getWaitTimeSeconds()).isEqualTo(Duration.ofSeconds(20));
+				});
+	}
+
+	@Test
+	void sqsBatchConfigurationWithAttributeNames() {
+		this.contextRunner
+				.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true",
+						"spring.cloud.aws.sqs.batch.attribute-names:MessageGroupId,MessageDeduplicationId")
+				.run(context -> {
+					assertThat(context).hasSingleBean(SqsProperties.class);
+					SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+					SqsProperties.Batch batchConfig = sqsProperties.getBatch();
+
+					assertThat(batchConfig.isEnabled()).isTrue();
+					assertThat(batchConfig.getAttributeNames()).containsExactly("MessageGroupId",
+							"MessageDeduplicationId");
+				});
+	}
 
 	@Configuration(proxyBeanMethods = false)
 	static class CustomComponentsConfiguration {

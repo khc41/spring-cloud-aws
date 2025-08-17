@@ -17,12 +17,11 @@ package io.awspring.cloud.autoconfigure.sqs;
 
 import io.awspring.cloud.autoconfigure.AwsClientProperties;
 import io.awspring.cloud.sqs.listener.QueueNotFoundStrategy;
+import java.time.Duration;
+import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.Nullable;
 import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName;
-
-import java.time.Duration;
-import java.util.List;
 
 /**
  * Properties related to AWS SQS.
@@ -92,9 +91,8 @@ public class SqsProperties extends AwsClientProperties {
 	public static class Listener {
 
 		/**
-		 * The maximum concurrent messages that can be processed simultaneously for each
-		 * queue. Note that if acknowledgement batching is being used, the actual maximum
-		 * number of messages inflight might be higher.
+		 * The maximum concurrent messages that can be processed simultaneously for each queue. Note that if
+		 * acknowledgement batching is being used, the actual maximum number of messages inflight might be higher.
 		 */
 		@Nullable
 		private Integer maxConcurrentMessages;
@@ -158,14 +156,15 @@ public class SqsProperties extends AwsClientProperties {
 	/**
 	 * Configuration properties for SQS automatic batching using AWS SDK's {@code SqsAsyncBatchManager}.
 	 * 
-	 * <p>Automatic batching improves performance and reduces costs by combining multiple SQS requests
-	 * into fewer AWS API calls. When enabled, Spring Cloud AWS will use a {@code BatchingSqsClientAdapter}
-	 * that wraps the standard {@code SqsAsyncClient} with batching capabilities.
+	 * <p>
+	 * Automatic batching improves performance and reduces costs by combining multiple SQS requests into fewer AWS API
+	 * calls. When enabled, Spring Cloud AWS will use a {@code BatchingSqsClientAdapter} that wraps the standard
+	 * {@code SqsAsyncClient} with batching capabilities.
 	 * 
-	 * <p><strong>Important:</strong> Batched operations are processed asynchronously, which may result
-	 * in false positives where method calls appear to succeed locally but fail during actual transmission
-	 * to AWS. Applications should handle the returned {@code CompletableFuture} objects to detect
-	 * actual transmission errors.
+	 * <p>
+	 * <strong>Important:</strong> Batched operations are processed asynchronously, which may result in false positives
+	 * where method calls appear to succeed locally but fail during actual transmission to AWS. Applications should
+	 * handle the returned {@code CompletableFuture} objects to detect actual transmission errors.
 	 * 
 	 * @since 3.2
 	 */
@@ -174,38 +173,37 @@ public class SqsProperties extends AwsClientProperties {
 		/**
 		 * Enables SQS automatic batching using AWS SDK's SqsAsyncBatchManager.
 		 * 
-		 * <p>When set to {@code true}, the {@code SqsAsyncClient} bean will be wrapped
-		 * with a {@code BatchingSqsClientAdapter} that automatically batches requests
-		 * to improve performance and reduce AWS API calls.
+		 * <p>
+		 * When set to {@code true}, the {@code SqsAsyncClient} bean will be wrapped with a
+		 * {@code BatchingSqsClientAdapter} that automatically batches requests to improve performance and reduce AWS
+		 * API calls.
 		 * 
-		 * <p>Default is {@code false}.
+		 * <p>
+		 * Default is {@code false}.
 		 */
 		private boolean enabled = false;
 
 		/**
-		 * The maximum number of messages that can be processed in a single batch. The
-		 * maximum is 10.
+		 * The maximum number of messages that can be processed in a single batch. The maximum is 10.
 		 */
 		@Nullable
 		private Integer maxNumberOfMessages;
 
 		/**
-		 * The frequency at which requests are sent to SQS when processing messages in a
-		 * batch.
+		 * The frequency at which requests are sent to SQS when processing messages in a batch.
 		 */
 		@Nullable
 		private Duration sendBatchFrequency;
 
 		/**
-		 * The visibility timeout to set for messages received in a batch. If unset, the
-		 * queue default is used.
+		 * The visibility timeout to set for messages received in a batch. If unset, the queue default is used.
 		 */
 		@Nullable
 		private Duration visibilityTimeout;
 
 		/**
-		 * The minimum wait duration for a receiveMessage request in a batch. To avoid
-		 * unnecessary CPU usage, do not set this value to 0.
+		 * The minimum wait duration for a receiveMessage request in a batch. To avoid unnecessary CPU usage, do not set
+		 * this value to 0.
 		 */
 		@Nullable
 		private Duration waitTimeSeconds;
@@ -226,9 +224,9 @@ public class SqsProperties extends AwsClientProperties {
 			return enabled;
 		}
 
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
 
 		@Nullable
 		public Integer getMaxNumberOfMessages() {

@@ -15,53 +15,60 @@
  */
 package io.awspring.cloud.sqs.operations;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import org.springframework.util.Assert;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.batchmanager.SqsAsyncBatchManager;
 import software.amazon.awssdk.services.sqs.model.*;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
 /**
  * An {@link SqsAsyncClient} adapter that provides automatic batching capabilities using AWS SDK's
  * {@link SqsAsyncBatchManager}.
  * 
- * <p>This adapter automatically batches SQS operations to improve performance and reduce costs by
- * combining multiple requests into fewer AWS API calls. All standard SQS operations are supported:
- * send message, receive message, delete message, and change message visibility.
+ * <p>
+ * This adapter automatically batches SQS operations to improve performance and reduce costs by combining multiple
+ * requests into fewer AWS API calls. All standard SQS operations are supported: send message, receive message, delete
+ * message, and change message visibility.
  * 
- * <p><strong>Important - False Positives Warning:</strong> This adapter processes requests 
- * asynchronously through batching. Method calls may return successfully before the actual request 
- * is sent to AWS SQS. This can result in false positives where the operation appears to succeed 
- * locally but fails during the actual transmission to AWS. Applications should:
+ * <p>
+ * <strong>Important - False Positives Warning:</strong> This adapter processes requests asynchronously through
+ * batching. Method calls may return successfully before the actual request is sent to AWS SQS. This can result in false
+ * positives where the operation appears to succeed locally but fails during the actual transmission to AWS.
+ * Applications should:
  * <ul>
  * <li>Always handle the returned {@link CompletableFuture} to detect actual transmission errors</li>
  * <li>Implement appropriate error handling and monitoring</li>
  * <li>Consider retry mechanisms for critical operations</li>
  * </ul>
  * 
- * <p><strong>Batch Optimization:</strong> The AWS SDK bypasses batching when {@code receiveMessage} is 
- * called with any of the following parameters: {@code messageAttributeNames}, {@code messageSystemAttributeNames}, 
- * {@code messageSystemAttributeNamesWithStrings}, or {@code overrideConfiguration}. To maintain consistent 
- * batching performance, Spring Cloud AWS handles these parameters as follows:
+ * <p>
+ * <strong>Batch Optimization:</strong> The AWS SDK bypasses batching when {@code receiveMessage} is called with any of
+ * the following parameters: {@code messageAttributeNames}, {@code messageSystemAttributeNames},
+ * {@code messageSystemAttributeNamesWithStrings}, or {@code overrideConfiguration}. To maintain consistent batching
+ * performance, Spring Cloud AWS handles these parameters as follows:
  * <ul>
- * <li>{@code messageAttributeNames} - excluded from per-request, configured globally via {@code spring.cloud.aws.sqs.batch.attribute-names}</li>
- * <li>{@code messageSystemAttributeNames} - excluded from per-request, configured globally via {@code spring.cloud.aws.sqs.batch.system-attribute-names}</li>
+ * <li>{@code messageAttributeNames} - excluded from per-request, configured globally via
+ * {@code spring.cloud.aws.sqs.batch.attribute-names}</li>
+ * <li>{@code messageSystemAttributeNames} - excluded from per-request, configured globally via
+ * {@code spring.cloud.aws.sqs.batch.system-attribute-names}</li>
  * <li>{@code messageSystemAttributeNamesWithStrings} - not used in Spring Cloud AWS {@code ReceiveMessageRequest}</li>
  * <li>{@code overrideConfiguration} - not used in Spring Cloud AWS {@code ReceiveMessageRequest}</li>
  * </ul>
- * <p>This design prevents batch bypass and ensures optimal performance. 
- * If per-request attribute configuration is required, consider disabling automatic batching.
+ * <p>
+ * This design prevents batch bypass and ensures optimal performance. If per-request attribute configuration is
+ * required, consider disabling automatic batching.
  * 
- * <p>This adapter is automatically configured by Spring Cloud AWS when automatic batching is enabled.
- * Users do not need to create instances directly - instead, enable batching through configuration:
+ * <p>
+ * This adapter is automatically configured by Spring Cloud AWS when automatic batching is enabled. Users do not need to
+ * create instances directly - instead, enable batching through configuration:
  * 
  * <pre>
- * spring.cloud.aws.sqs.batch.enabled=true
+ * spring.cloud.aws.sqs.batch.enabled = true
  * </pre>
  * 
- * <p>Once enabled, all {@code SqsTemplate} operations will automatically use batching transparently.
+ * <p>
+ * Once enabled, all {@code SqsTemplate} operations will automatically use batching transparently.
  * 
  * @author khc41
  * @since 3.2
@@ -90,8 +97,9 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	/**
 	 * Closes the underlying batch manager and releases associated resources.
 	 * 
-	 * <p>This method should be called when the adapter is no longer needed to ensure
-	 * proper cleanup of threads and connections.
+	 * <p>
+	 * This method should be called when the adapter is no longer needed to ensure proper cleanup of threads and
+	 * connections.
 	 */
 	@Override
 	public void close() {
@@ -101,9 +109,9 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	/**
 	 * Sends a message to the specified SQS queue using automatic batching.
 	 * 
-	 * <p><strong>Important:</strong> This method returns immediately, but the actual sending
-	 * is performed asynchronously. Handle the returned {@link CompletableFuture} to detect
-	 * transmission errors.
+	 * <p>
+	 * <strong>Important:</strong> This method returns immediately, but the actual sending is performed asynchronously.
+	 * Handle the returned {@link CompletableFuture} to detect transmission errors.
 	 * 
 	 * @param sendMessageRequest the request containing queue URL and message details
 	 * @return a {@link CompletableFuture} that completes with the send result
@@ -116,9 +124,9 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	/**
 	 * Sends a message to the specified SQS queue using automatic batching.
 	 * 
-	 * <p><strong>Important:</strong> This method returns immediately, but the actual sending
-	 * is performed asynchronously. Handle the returned {@link CompletableFuture} to detect
-	 * transmission errors.
+	 * <p>
+	 * <strong>Important:</strong> This method returns immediately, but the actual sending is performed asynchronously.
+	 * Handle the returned {@link CompletableFuture} to detect transmission errors.
 	 * 
 	 * @param sendMessageRequest a consumer to configure the send message request
 	 * @return a {@link CompletableFuture} that completes with the send result
@@ -131,8 +139,8 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	/**
 	 * Receives messages from the specified SQS queue using automatic batching.
 	 * 
-	 * <p>The batching manager may combine multiple receive requests to optimize
-	 * AWS API usage.
+	 * <p>
+	 * The batching manager may combine multiple receive requests to optimize AWS API usage.
 	 * 
 	 * @param receiveMessageRequest the request containing queue URL and receive options
 	 * @return a {@link CompletableFuture} that completes with the received messages
@@ -145,22 +153,24 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	/**
 	 * Receives messages from the specified SQS queue using automatic batching.
 	 * 
-	 * <p>The batching manager may combine multiple receive requests to optimize
-	 * AWS API usage.
+	 * <p>
+	 * The batching manager may combine multiple receive requests to optimize AWS API usage.
 	 * 
 	 * @param receiveMessageRequest a consumer to configure the receive message request
 	 * @return a {@link CompletableFuture} that completes with the received messages
 	 */
 	@Override
-	public CompletableFuture<ReceiveMessageResponse> receiveMessage(Consumer<ReceiveMessageRequest.Builder> receiveMessageRequest) {
+	public CompletableFuture<ReceiveMessageResponse> receiveMessage(
+			Consumer<ReceiveMessageRequest.Builder> receiveMessageRequest) {
 		return batchManager.receiveMessage(receiveMessageRequest);
 	}
 
 	/**
 	 * Deletes a message from the specified SQS queue using automatic batching.
 	 * 
-	 * <p><strong>Important:</strong> The actual deletion may be delayed due to batching.
-	 * Handle the returned {@link CompletableFuture} to confirm successful deletion.
+	 * <p>
+	 * <strong>Important:</strong> The actual deletion may be delayed due to batching. Handle the returned
+	 * {@link CompletableFuture} to confirm successful deletion.
 	 * 
 	 * @param deleteMessageRequest the request containing queue URL and receipt handle
 	 * @return a {@link CompletableFuture} that completes with the deletion result
@@ -173,42 +183,46 @@ public class BatchingSqsClientAdapter implements SqsAsyncClient {
 	/**
 	 * Deletes a message from the specified SQS queue using automatic batching.
 	 * 
-	 * <p><strong>Important:</strong> The actual deletion may be delayed due to batching.
-	 * Handle the returned {@link CompletableFuture} to confirm successful deletion.
+	 * <p>
+	 * <strong>Important:</strong> The actual deletion may be delayed due to batching. Handle the returned
+	 * {@link CompletableFuture} to confirm successful deletion.
 	 * 
 	 * @param deleteMessageRequest a consumer to configure the delete message request
 	 * @return a {@link CompletableFuture} that completes with the deletion result
 	 */
 	@Override
-	public CompletableFuture<DeleteMessageResponse> deleteMessage(Consumer<DeleteMessageRequest.Builder> deleteMessageRequest) {
+	public CompletableFuture<DeleteMessageResponse> deleteMessage(
+			Consumer<DeleteMessageRequest.Builder> deleteMessageRequest) {
 		return batchManager.deleteMessage(deleteMessageRequest);
 	}
 
 	/**
 	 * Changes the visibility timeout of a message in the specified SQS queue using automatic batching.
 	 * 
-	 * <p>The batching manager may combine multiple visibility change requests to optimize
-	 * AWS API usage.
+	 * <p>
+	 * The batching manager may combine multiple visibility change requests to optimize AWS API usage.
 	 * 
 	 * @param changeMessageVisibilityRequest the request containing queue URL, receipt handle, and new timeout
 	 * @return a {@link CompletableFuture} that completes with the visibility change result
 	 */
 	@Override
-	public CompletableFuture<ChangeMessageVisibilityResponse> changeMessageVisibility(ChangeMessageVisibilityRequest changeMessageVisibilityRequest) {
+	public CompletableFuture<ChangeMessageVisibilityResponse> changeMessageVisibility(
+			ChangeMessageVisibilityRequest changeMessageVisibilityRequest) {
 		return batchManager.changeMessageVisibility(changeMessageVisibilityRequest);
 	}
 
 	/**
 	 * Changes the visibility timeout of a message in the specified SQS queue using automatic batching.
 	 * 
-	 * <p>The batching manager may combine multiple visibility change requests to optimize
-	 * AWS API usage.
+	 * <p>
+	 * The batching manager may combine multiple visibility change requests to optimize AWS API usage.
 	 * 
 	 * @param changeMessageVisibilityRequest a consumer to configure the change visibility request
 	 * @return a {@link CompletableFuture} that completes with the visibility change result
 	 */
 	@Override
-	public CompletableFuture<ChangeMessageVisibilityResponse> changeMessageVisibility(Consumer<ChangeMessageVisibilityRequest.Builder> changeMessageVisibilityRequest) {
+	public CompletableFuture<ChangeMessageVisibilityResponse> changeMessageVisibility(
+			Consumer<ChangeMessageVisibilityRequest.Builder> changeMessageVisibilityRequest) {
 		return batchManager.changeMessageVisibility(changeMessageVisibilityRequest);
 	}
 }

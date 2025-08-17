@@ -169,10 +169,30 @@ public class SqsProperties extends AwsClientProperties {
 
 	}
 
+	/**
+	 * Configuration properties for SQS automatic batching using AWS SDK's {@code SqsAsyncBatchManager}.
+	 * 
+	 * <p>Automatic batching improves performance and reduces costs by combining multiple SQS requests
+	 * into fewer AWS API calls. When enabled, Spring Cloud AWS will use a {@code BatchingSqsClientAdapter}
+	 * that wraps the standard {@code SqsAsyncClient} with batching capabilities.
+	 * 
+	 * <p><strong>Important:</strong> Batched operations are processed asynchronously, which may result
+	 * in false positives where method calls appear to succeed locally but fail during actual transmission
+	 * to AWS. Applications should handle the returned {@code CompletableFuture} objects to detect
+	 * actual transmission errors.
+	 * 
+	 * @since 3.2
+	 */
 	public static class Batch {
 
 		/**
 		 * Enables SQS automatic batching using AWS SDK's SqsAsyncBatchManager.
+		 * 
+		 * <p>When set to {@code true}, the {@code SqsAsyncClient} bean will be wrapped
+		 * with a {@code BatchingSqsClientAdapter} that automatically batches requests
+		 * to improve performance and reduce AWS API calls.
+		 * 
+		 * <p>Default is {@code false}.
 		 */
 		private boolean enabled = false;
 

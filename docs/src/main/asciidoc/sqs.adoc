@@ -1007,6 +1007,7 @@ The Spring Boot Starter for SQS provides the following auto-configuration proper
 | `spring.cloud.aws.sqs.batch.wait-time-seconds` | Wait time for receiveMessage requests in batch. | No | AWS SDK default
 | `spring.cloud.aws.sqs.batch.system-attribute-names` | System attributes to request for receiveMessage calls. | No | None
 | `spring.cloud.aws.sqs.batch.attribute-names` | Message attributes to request for receiveMessage calls. | No | None
+| `spring.cloud.aws.sqs.batch.scheduled-executor-pool-size` | Size of the scheduled thread pool for batching operations. | No | 5
 |===
 
 

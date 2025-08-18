@@ -220,6 +220,15 @@ public class SqsProperties extends AwsClientProperties {
 		@Nullable
 		private List<String> attributeNames;
 
+		/**
+		 * The size of the scheduled thread pool used for batching operations. This thread pool handles periodic batch
+		 * sending and other scheduled tasks.
+		 * 
+		 * <p>
+		 * Default is {@code 5}.
+		 */
+		private int scheduledExecutorPoolSize = 5;
+
 		public boolean isEnabled() {
 			return enabled;
 		}
@@ -280,6 +289,14 @@ public class SqsProperties extends AwsClientProperties {
 
 		public void setAttributeNames(List<String> attributeNames) {
 			this.attributeNames = attributeNames;
+		}
+
+		public int getScheduledExecutorPoolSize() {
+			return scheduledExecutorPoolSize;
+		}
+
+		public void setScheduledExecutorPoolSize(int scheduledExecutorPoolSize) {
+			this.scheduledExecutorPoolSize = scheduledExecutorPoolSize;
 		}
 
 	}

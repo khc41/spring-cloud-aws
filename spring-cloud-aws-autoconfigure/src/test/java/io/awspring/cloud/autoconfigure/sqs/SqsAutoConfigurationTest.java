@@ -405,6 +405,7 @@ class SqsAutoConfigurationTest {
 			assertThat(batchConfig.getWaitTimeSeconds()).isNull();
 			assertThat(batchConfig.getSystemAttributeNames()).isNull();
 			assertThat(batchConfig.getAttributeNames()).isNull();
+			assertThat(batchConfig.getScheduledExecutorPoolSize()).isEqualTo(5);
 
 			assertThat(context).hasSingleBean(SqsAsyncClient.class);
 			SqsAsyncClient client = context.getBean(SqsAsyncClient.class);
@@ -452,6 +453,42 @@ class SqsAutoConfigurationTest {
 					assertThat(batchConfig.getAttributeNames()).containsExactly("MessageGroupId",
 							"MessageDeduplicationId");
 				});
+	}
+
+	@Test
+	void sqsBatchConfigurationWithDefaultScheduledExecutorPoolSize() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true").run(context -> {
+			assertThat(context).hasSingleBean(SqsProperties.class);
+			SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+			SqsProperties.Batch batchConfig = sqsProperties.getBatch();
+
+			assertThat(batchConfig.isEnabled()).isTrue();
+			assertThat(batchConfig.getScheduledExecutorPoolSize()).isEqualTo(5);
+
+			assertThat(context).hasBean("sqsBatchingScheduledExecutor");
+		});
+	}
+
+	@Test
+	void sqsBatchConfigurationWithCustomScheduledExecutorPoolSize() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:true",
+				"spring.cloud.aws.sqs.batch.scheduled-executor-pool-size:10").run(context -> {
+					assertThat(context).hasSingleBean(SqsProperties.class);
+					SqsProperties sqsProperties = context.getBean(SqsProperties.class);
+					SqsProperties.Batch batchConfig = sqsProperties.getBatch();
+
+					assertThat(batchConfig.isEnabled()).isTrue();
+					assertThat(batchConfig.getScheduledExecutorPoolSize()).isEqualTo(10);
+
+					assertThat(context).hasBean("sqsBatchingScheduledExecutor");
+				});
+	}
+
+	@Test
+	void sqsBatchConfigurationWithBatchDisabledDoesNotCreateScheduledExecutor() {
+		this.contextRunner.withPropertyValues("spring.cloud.aws.sqs.batch.enabled:false").run(context -> {
+			assertThat(context).doesNotHaveBean("sqsBatchingScheduledExecutor");
+		});
 	}
 
 	@Configuration(proxyBeanMethods = false)

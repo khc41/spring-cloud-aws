@@ -35,6 +35,7 @@ import io.awspring.cloud.sqs.support.observation.SqsListenerObservation;
 import io.awspring.cloud.sqs.support.observation.SqsTemplateObservation;
 import io.micrometer.observation.ObservationRegistry;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -60,6 +61,7 @@ import software.amazon.awssdk.services.sqs.model.Message;
  * @author Maciej Walkowiak
  * @author Wei Jiang
  * @author Dongha Kim
+ * @author khc41
  * @since 3.0
  */
 @AutoConfiguration
@@ -91,14 +93,27 @@ public class SqsAutoConfiguration {
 	@ConditionalOnProperty(name = "spring.cloud.aws.sqs.batch.enabled", havingValue = "true")
 	@Bean
 	@Primary
-	public SqsAsyncClient batchSqsAsyncClient(SqsAsyncClient sqsAsyncClient) {
-		SqsAsyncBatchManager batchManager = createBatchManager(sqsAsyncClient);
+	public SqsAsyncClient batchSqsAsyncClient(SqsAsyncClient sqsAsyncClient,
+			ScheduledExecutorService sqsBatchingScheduledExecutor) {
+		SqsAsyncBatchManager batchManager = createBatchManager(sqsAsyncClient, sqsBatchingScheduledExecutor);
 		return new BatchingSqsClientAdapter(batchManager);
 	}
 
-	private SqsAsyncBatchManager createBatchManager(SqsAsyncClient sqsAsyncClient) {
-		return SqsAsyncBatchManager.builder().client(sqsAsyncClient)
-				.scheduledExecutor(Executors.newScheduledThreadPool(5))
+	@ConditionalOnProperty(name = "spring.cloud.aws.sqs.batch.enabled", havingValue = "true")
+	@ConditionalOnMissingBean(name = "sqsBatchingScheduledExecutor")
+	@Bean
+	public ScheduledExecutorService sqsBatchingScheduledExecutor() {
+		int poolSize = this.sqsProperties.getBatch().getScheduledExecutorPoolSize();
+		if (poolSize <= 0) {
+			throw new IllegalArgumentException(
+					"scheduledExecutorPoolSize must be greater than 0, but was: " + poolSize);
+		}
+		return Executors.newScheduledThreadPool(poolSize);
+	}
+
+	private SqsAsyncBatchManager createBatchManager(SqsAsyncClient sqsAsyncClient,
+			ScheduledExecutorService scheduledExecutor) {
+		return SqsAsyncBatchManager.builder().client(sqsAsyncClient).scheduledExecutor(scheduledExecutor)
 				.overrideConfiguration(this::configurationProperties).build();
 	}
 
